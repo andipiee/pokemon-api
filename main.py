@@ -1,16 +1,29 @@
-# This is a sample Python script.
+import asyncio
+import logging
+from db_setup import DatabaseManager
+from scrapper import PokemonScraper
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+async def main():
+    # Initialize database manager
+    db_manager = DatabaseManager()
+
+    # Initialize the database
+    await db_manager.init_db()
+
+    # Create scraper instance
+    pokemon_scraper = PokemonScraper(db_manager)
+
+    # Run the scraper to populate the database
+    # Get first generation pokemon (151)
+    await pokemon_scraper.scrape_pokemon(151)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    asyncio.run(main())
