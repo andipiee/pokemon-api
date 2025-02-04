@@ -1,7 +1,8 @@
-import asyncio
+import uvicorn
 import logging
 from db_setup import DatabaseManager
 from scrapper import PokemonScraper
+from server import PokemonServer
 
 # Configure logging
 logging.basicConfig(
@@ -9,21 +10,14 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-
-async def main():
-    # Initialize database manager
+def main():
+    # Initialize components
     db_manager = DatabaseManager()
-
-    # Initialize the database
-    await db_manager.init_db()
-
-    # Create scraper instance
     pokemon_scraper = PokemonScraper(db_manager)
+    server = PokemonServer(db_manager, pokemon_scraper)
 
-    # Run the scraper to populate the database
-    # Get first generation pokemon (151)
-    await pokemon_scraper.scrape_pokemon(151)
-
+    # Run the server
+    uvicorn.run(server.app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
