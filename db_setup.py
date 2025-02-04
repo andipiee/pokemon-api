@@ -91,3 +91,18 @@ class DatabaseManager:
                 "base_experience": pokemon["base_experience"],
                 "sprite_url": pokemon["sprite_url"]
             }
+
+    async def count_pokemon(self, type_filter=None):
+        """Count the total number of Pokemon with optional filtering"""
+        async with aiosqlite.connect(self.db_path) as db:
+            query = "SELECT COUNT(*) FROM pokemon"
+            params = []
+
+            if type_filter:
+                query += " WHERE types LIKE ?"
+                params.append(f"%{type_filter}%")
+
+            cursor = await db.execute(query, params)
+            count = await cursor.fetchone()
+
+            return count[0] if count else 0

@@ -22,7 +22,7 @@ class PokemonServer:
         @self.app.on_event("startup")
         async def startup_event():
             await self.db_manager.init_db()
-            await self.pokemon_scraper.scrape_pokemon()
+            await self.pokemon_scraper.scrape_pokemon(151) # remove this parameter to scrape all pokemon data
 
         @self.app.get("/api/pokemon", response_model=PokemonResponse)
         async def get_pokemon(
