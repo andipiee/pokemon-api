@@ -22,12 +22,16 @@ class PokemonScraper:
 
             logger.info(f"Found {total_pokemon} Pokemon to scrape")
 
+            # Determine starting point based on existing data
+            existing_count = await self.db_manager.count_pokemon()
+            start_id = existing_count + 1 if existing_count < total_pokemon else total_pokemon
+
             # Scrape all Pokemon
-            for pokemon_id in range(1, total_pokemon + 1):
+            for pokemon_id in range(start_id, total_pokemon + 1):
                 response = requests.get(f"https://pokeapi.co/api/v2/pokemon/{pokemon_id}")
 
                 # Check if database has data
-                existing_pokemon = await self.db_manager.get_pokemon(page_size=1)
+                existing_pokemon = await self.db_manager.get_pokemon_by_id(pokemon_id=pokemon_id)
                 if existing_pokemon:
                     logger.info(f"Pokemon with id {pokemon_id} already exists in database")
                     continue

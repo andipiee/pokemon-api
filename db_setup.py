@@ -1,6 +1,7 @@
 import aiosqlite
 import logging
 import json
+from pokemon_class import PokemonData, PokemonAttributes
 
 logger = logging.getLogger(__name__)
 
@@ -68,3 +69,40 @@ class DatabaseManager:
             pokemon_list = await cursor.fetchall()
 
             return [dict(pokemon) for pokemon in pokemon_list]
+
+    async def get_pokemon_by_id(self, pokemon_id: int):
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cursor = await db.execute(
+                "SELECT * FROM pokemon WHERE id = ?",
+                (pokemon_id,)
+            )
+            pokemon = await cursor.fetchone()
+
+            if pokemon is None:
+                return None
+
+            return {
+                "id": pokemon["id"],
+                "name": pokemon["name"],
+                "height": pokemon["height"],
+                "weight": pokemon["weight"],
+                "types": pokemon["types"],  # Keep as a string, convert later
+                "base_experience": pokemon["base_experience"],
+                "sprite_url": pokemon["sprite_url"]
+            }
+
+    async def count_pokemon(self, type_filter=None):
+        """Count the total number of Pokemon with optional filtering"""
+        async with aiosqlite.connect(self.db_path) as db:
+            query = "SELECT COUNT(*) FROM pokemon"
+            params = []
+
+            if type_filter:
+                query += " WHERE types LIKE ?"
+                params.append(f"%{type_filter}%")
+
+            cursor = await db.execute(query, params)
+            count = await cursor.fetchone()
+
+            return count[0] if count else 0
